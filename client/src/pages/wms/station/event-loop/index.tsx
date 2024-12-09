@@ -346,7 +346,7 @@ export default class WorkStationEventLoop {
                     : domain
 
             this.websocket = new WebSocket(
-                `ws://localhost:4000/station/websocket?stationCode=${that.stationId}&Authorization=` +
+                `/station/websocket?stationCode=${that.stationId}&Authorization=` +
                     encodeURIComponent(
                         localStorage.getItem("ws_token") as string
                     )
