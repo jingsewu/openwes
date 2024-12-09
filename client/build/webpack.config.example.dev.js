@@ -86,7 +86,7 @@ webpackConfig = {
     devtool: "inline-source-map",
     devServer: {
         hot: true,
-        host: "sentrix.baidu.com",
+        host: "test.baidu.com",
         port: 4001,
         historyApiFallback: true,
         open: true,
