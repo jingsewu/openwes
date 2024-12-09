@@ -92,7 +92,7 @@ Thank you for using and contributing to the Smart Warehouse Management System!
 ## Architecture
 The architecture of Open WES is modular and scalable, designed to handle complex warehouse operations. Below is a high-level overview of its components:
 
-![Architecture](./doc/image/architecture.png)
+![Architecture](server/doc/image/architecture.png)
 
 ## Getting Help
 
