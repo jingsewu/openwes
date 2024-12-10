@@ -1,7 +1,7 @@
-import axios, {AxiosRequestConfig} from "axios"
-import {makeTranslator, toast} from "amis"
-import {attachmentAdpator} from "amis-core"
-import {ApiObject} from "amis-core/lib/types"
+import axios, { AxiosRequestConfig } from "axios"
+import { makeTranslator, toast } from "amis"
+import { attachmentAdpator } from "amis-core"
+import { ApiObject } from "amis-core/lib/types"
 import store from "@/stores"
 
 /**
@@ -24,6 +24,11 @@ export default function request(config: AxiosRequestConfig) {
 
     config.headers["X-WarehouseID"] = warehouseCode
     config.headers["locale"] = store.locale
+
+    let stationId = <string>localStorage.getItem("stationId")
+    if (!config.headers["StationCode"] && stationId) {
+        config.headers["StationCode"] = stationId
+    }
 
     let data = config.data
 
@@ -92,6 +97,8 @@ export default function request(config: AxiosRequestConfig) {
                     ...response,
                     message: invalidResults[0].defaultMessage
                 })
+            } else if (response?.data?.errorCode === "SAT010001") {
+                resolve(response)
             } else if (response?.status == 401 || response?.code == 401) {
                 // 未登陆
                 console.warn("redirect url: ", response.data.redirectUrl)

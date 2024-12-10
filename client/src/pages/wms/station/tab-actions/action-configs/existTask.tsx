@@ -43,6 +43,7 @@ const taskConfig: TabAction = {
             message?.({ type: MessageType.ERROR, content: msg })
         } else {
             history.push("/wms/workStation")
+            localStorage.removeItem("stationId")
         }
     }
 }

@@ -4,11 +4,17 @@ import type {
 } from "@/pages/wms/station/event-loop/types"
 import type { WorkStationConfig } from "@/pages/wms/station/instances/types"
 import type { FC } from "react"
-import React, { useContext } from "react"
+import React, { useContext, useState, useEffect, memo } from "react"
 import type { RouteComponentProps } from "react-router"
+import { Select, Typography, Button } from "antd"
+
 import { APIContext, Provider, WorkStationContext } from "./event-loop/provider"
 import Layout from "./layout"
 import WorkStationCard from "./WorkStationCard"
+import request from "@/utils/requestInterceptor"
+let warehouseCode = localStorage.getItem("warehouseCode")
+
+const { Title } = Typography
 
 type WorkStationProps = RouteComponentProps & {
     /** TODO: 此处应该修改为由hook获取 */
@@ -50,7 +56,81 @@ const WorkStation = (props: WorkStationProps) => {
 
     const InstanceLayout = layout
 
-    return (
+    const [isConfigSationId, setIsConfigStationId] = useState(true)
+    const [stationId, setStationId] = useState("")
+    const [options, setOptions] = useState<any[]>([])
+
+    useEffect(() => {
+        getStationId()
+    }, [])
+
+    const getStationId = async () => {
+        const res: any = await request({
+            method: "get",
+            url: "/station/api"
+        })
+        if (res?.data?.errorCode === "SAT010001") {
+            setIsConfigStationId(false)
+            getStationOptions()
+        } else {
+            setIsConfigStationId(true)
+        }
+    }
+
+    const getStationOptions = () => {
+        request({
+            method: "post",
+            url:
+                "/search/search?page=1&perPage1000&warehouseCode-op=eq&warehouseCode=" +
+                warehouseCode,
+            data: {
+                searchIdentity: "WWorkStation",
+                searchObject: {
+                    orderBy: "update_time desc"
+                },
+                showColumns: [
+                    {
+                        name: "id",
+                        label: "ID",
+                        hidden: true
+                    },
+                    {
+                        name: "version",
+                        label: "Version",
+                        hidden: true
+                    },
+                    {
+                        name: "warehouseCode",
+                        label: "table.warehouseCode",
+                        hidden: true
+                    },
+                    {
+                        name: "stationCode",
+                        label: "table.workstationCoding",
+                        searchable: true
+                    },
+                    {
+                        name: "stationName",
+                        label: "table.workstationName"
+                    }
+                ]
+            }
+        }).then((res: any) => {
+            console.log("getStationOptions", res)
+            setOptions(res.data.items)
+        })
+    }
+
+    const handleChange = (val: string) => {
+        setStationId(val)
+    }
+
+    const handleClick = () => {
+        localStorage.setItem("stationId", stationId)
+        setIsConfigStationId(true)
+    }
+
+    return isConfigSationId ? (
         <Provider
             stationCode={code}
             type={type}
@@ -74,6 +154,32 @@ const WorkStation = (props: WorkStationProps) => {
                 </Layout>
             )}
         </Provider>
+    ) : (
+        <div className="w-full h-full d-flex flex-col justify-center items-center">
+            <Title level={4} className="mb-3">
+                请选择工作站
+            </Title>
+            <Select
+                // defaultValue="lucy"
+                style={{ width: 300 }}
+                value={stationId}
+                onChange={handleChange}
+                options={options}
+                fieldNames={{ label: "stationName", value: "id" }}
+            />
+            <Button
+                type="primary"
+                style={{
+                    width: 300,
+                    backgroundColor: "#23c560",
+                    borderColor: "#23c560",
+                    marginTop: 10
+                }}
+                onClick={handleClick}
+            >
+                确定
+            </Button>
+        </div>
     )
 }
 
@@ -100,4 +206,4 @@ const InstanceLayoutWrapper: FC<any> = (props) => {
     return <div style={{ height: "100%" }}>{childrenWithProps}</div>
 }
 
-export default WorkStation
+export default memo(WorkStation)
